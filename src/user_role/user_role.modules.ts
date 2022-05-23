@@ -9,4 +9,4 @@ import { DatabaseService } from '../database.provider';
   providers: [UserRoleService, DatabaseService],
   exports: [UserRoleService, DatabaseService],
 })
-export class AppModule {}
+export class UserRoleModule {}

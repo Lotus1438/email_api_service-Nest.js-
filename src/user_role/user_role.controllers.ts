@@ -1,28 +1,68 @@
-import { Controller, Get, Post, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Logger,
+  Request,
+} from '@nestjs/common';
 import { UserRoleService } from './user_role.service';
 
 @Controller('user_role')
 export class UserRoleController {
-  constructor(private readonly userRoleService: UserRoleService) {}
-
-  @Get()
-  getHello(): string {
-    return this.userRoleService.getHello();
+  private logger: any;
+  constructor(private userRoleService: UserRoleService) {
+    this.logger = new Logger('USER ROLE');
   }
 
-  @Post('table/:user_role')
-  async newTable(@Param('user_role') user_role: any): Promise<string> {
-    let response = await this.userRoleService
-      .createTable(user_role)
-      .then((result) => {
-        return (
-          'User Role ' + user_role + ' received!\n' + JSON.stringify(result)
-        );
-      })
-      .catch((reason) => {
-        return reason;
-      });
+  @Post('/create')
+  async createUserRole(@Body() body: any) {
+    const { table_name, params } = body;
+    return await this.userRoleService.createUserRole(table_name, params);
+  }
 
-    return response;
+  @Get('/')
+  async getAllUserRole(@Request() req: any) {
+    const [table_name] = req.route.path
+      .split('/')
+      .filter((item: string) => item != '');
+    return await this.userRoleService.getAllUserRole(table_name);
+  }
+
+  @Get('/:id')
+  async getUserRoleById(@Param() params: any, @Request() req: any) {
+    const [table_name] = req.route.path
+      .split('/')
+      .filter((item: string) => item != '');
+    const { id = '' } = params;
+    const result = await this.userRoleService.getUserRoleById(table_name, id);
+    return result
+      ? { success: true, message: 'Fetched record', data: result }
+      : {
+          success: false,
+          message: 'User role does not exist',
+        };
+  }
+
+  @Put('/:id')
+  async updateUserRoleById(@Body() body: any, @Param() { id }: any) {
+    const { table_name, params } = body;
+    return await this.userRoleService.updateUserRoleById(
+      table_name,
+      id,
+      params,
+    );
+  }
+
+  @Delete('/:id')
+  async deleteUserRoleById(@Param() params: any, @Request() req: any) {
+    const [table_name] = req.route.path
+      .split('/')
+      .filter((item: string) => item != '');
+    const { id = '' } = params;
+    return await this.userRoleService.deleteUserRoleById(table_name, id);
   }
 }

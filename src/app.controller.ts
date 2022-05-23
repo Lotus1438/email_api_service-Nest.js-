@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
 
@@ -36,7 +36,7 @@ export class AppController {
     );
   }
   @Post('/register_user')
-  registerUser(@Body() body: any) {
+  registerUser(@Body() body: any, @Req() req: any) {
     const { table_name, params } = body;
     return this.appService.registerRecord(table_name, params);
   }

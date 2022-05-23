@@ -9,4 +9,4 @@ import { DatabaseService } from '../database.provider';
   providers: [UserService, DatabaseService],
   exports: [UserService, DatabaseService],
 })
-export class AppModule {}
+export class UserModule {}

@@ -1,41 +1,48 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { table } from 'console';
-import * as rethink from 'rethinkdb';
-import { UserRole } from './user_role.dto';
+import { Injectable } from '@nestjs/common';
+import { DatabaseService } from '../database.provider';
+const { DATABASE_NAME = 'email_database' } = process.env;
 
 @Injectable()
 export class UserRoleService {
-  user_roles: UserRole[] = [];
-
-  getHello(): string {
-    return 'Hello World!';
+  constructor(private databaseService: DatabaseService) {}
+  async createUserRole(table_name: string, params: Record<string, any>) {
+    return await this.databaseService.createRecord(
+      DATABASE_NAME,
+      table_name,
+      params,
+    );
   }
 
-  private connection: rethink.Connection;
-
-  constructor(@Inject('UserProvider') connection: any) {
-    this.connection = connection;
+  async getAllUserRole(table_name: string) {
+    return await this.databaseService.getAllRecord(DATABASE_NAME, table_name);
   }
 
-  // create table
-  async createTable(tableName: string): Promise<rethink.CreateResult> {
-    let result = await rethink
-      .db('mydb')
-      .tableCreate(tableName)
-      .run(this.connection);
-    return result;
+  async getUserRoleById(table_name: string, id: string) {
+    return await this.databaseService.getRecordById(
+      DATABASE_NAME,
+      table_name,
+      id,
+    );
   }
 
-  // insert data
-  async insert(
-    tableName: string,
-    content: object,
-  ): Promise<rethink.WriteResult> {
-    let result = await rethink
-      .table(tableName)
-      .insert(content)
-      .run(this.connection);
+  async updateUserRoleById(
+    table_name: string,
+    id: string,
+    params: Record<string, any>,
+  ) {
+    return await this.databaseService.updateRecordById(
+      DATABASE_NAME,
+      table_name,
+      id,
+      params,
+    );
+  }
 
-    return result;
+  async deleteUserRoleById(table_name: string, id: string) {
+    return await this.databaseService.deleteRecordById(
+      DATABASE_NAME,
+      table_name,
+      id,
+    );
   }
 }
