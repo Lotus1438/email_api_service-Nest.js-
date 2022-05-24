@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
 
@@ -11,10 +11,13 @@ const tables = TABLE_NAME.split(',');
 
 @Controller()
 export class AppController {
+  private logger: any;
   constructor(
     private appService: AppService,
     private databaseService: DatabaseService,
-  ) {}
+  ) {
+    this.logger = new Logger('APP');
+  }
 
   async onModuleInit() {
     const initialized_role = {

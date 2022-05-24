@@ -29,6 +29,7 @@ export class UserRoleController {
     const [table_name] = req.route.path
       .split('/')
       .filter((item: string) => item != '');
+    this.logger.log(this.getAllUserRole);
     return await this.userRoleService.getAllUserRole(table_name);
   }
 

@@ -1,6 +1,6 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, Logger, Req } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import express from 'express';
+import express, { Response, Request } from 'express';
 import { LoginService } from './login.service';
 
 const app = express();
@@ -8,10 +8,17 @@ app.use(cookieParser());
 
 @Controller()
 export class LoginController {
-  constructor(private loginService: LoginService) {}
+  private logger: any;
+  constructor(private loginService: LoginService) {
+    this.logger = new Logger('LOGIN/LOGOUT');
+  }
 
   @Post('/login')
-  async login(@Body() body: any, @Res({ passthrough: true }) res: any) {
+  async login(
+    @Body() body: any,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { params } = body;
     const { user, access_token } = await this.loginService.loginUser(
       'user',

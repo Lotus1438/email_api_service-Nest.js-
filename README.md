@@ -87,3 +87,7 @@ Nest is [MIT licensed](LICENSE).
 
 -Added: centralized log, bearer token, Login & Logout
 -Updated: user_role, register, user, message (CRUD)
+
+## 0.0.4
+
+-Added: AuthGuards & RoleGuards Decorator
