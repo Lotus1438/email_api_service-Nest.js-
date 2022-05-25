@@ -2,28 +2,26 @@ import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
-// import { AuthenticationMiddleware } from './authentication.middleware';
-import { RegisterModule } from './register/register.module';
-import { RegisterService } from './register/register.service';
-import { LoggerMiddleware } from './utils/logger.middleware';
+import { LoggerMiddleware } from './logger.middleware';
 import { UserRoleModule } from './user_role/user_role.modules';
 import { UserModule } from './user/user.module';
 import { LoginModule } from './login/login.module';
+import { MessageModule } from './messages/message.modules';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    RegisterModule,
     UserRoleModule,
     UserModule,
     LoginModule,
+    MessageModule,
     JwtModule.register({
       secret: 'secret',
       signOptions: { expiresIn: '1d' },
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, DatabaseService, RegisterService],
+  providers: [AppService, DatabaseService],
   exports: [AppService],
 })
 export class AppModule implements NestModule {

@@ -1,17 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RegisterService } from './register/register.service';
+import { DatabaseService } from './database.provider';
+const { DATABASE_NAME = 'email_database' } = process.env;
 
 @Injectable()
 export class AppService {
   logger: Logger;
-  constructor(private registerService: RegisterService) {
+  constructor(private databaseService: DatabaseService) {
     this.logger = new Logger('AppService');
   }
   async registerRecord(table_name: string, params: Record<string, any>) {
     this.logger.log(params);
-    return await this.registerService.registerRecord(table_name, params);
+    return await this.databaseService.createRecord(
+      DATABASE_NAME,
+      table_name,
+      params,
+    );
   }
   async getAllRegisterRecord(table_name: string) {
-    return await this.registerService.getRegisterRecord(table_name);
+    return await this.databaseService.getAllRecord(DATABASE_NAME, table_name);
   }
 }

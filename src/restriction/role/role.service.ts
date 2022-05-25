@@ -9,25 +9,43 @@ export class RoleService {
     private databaseService: DatabaseService,
   ) {}
 
-  async getLoggedinUser(access_token: string) {
+  async getLoggedinUserRole(access_token: string) {
     const decoded = this.jwtService.decode(access_token ?? '') as Record<
       string,
       any
     >;
-    console.log(
-      '%c 🕋: RoleService -> getLoggedinUser -> decoded ',
-      'font-size:16px;background-color:#036178;color:white;',
-      typeof decoded,
-    );
-    const user_record = await this.databaseService.getRecordByFilter(
+    const [{ role_id: login_user_role_id }] =
+      await this.databaseService.getRecordByFilter(DATABASE_NAME, 'user', {
+        username: decoded?.username,
+        password: decoded?.password,
+      });
+    return await this.databaseService.getRecordById(
       DATABASE_NAME,
-      'user',
-      { username: decoded?.username, password: decoded?.password },
+      'user_role',
+      login_user_role_id,
     );
-    console.log(
-      '%c 🇸🇰: RoleService -> getLoggedinUser -> user_record ',
-      'font-size:16px;background-color:#3f6816;color:white;',
-      user_record,
-    );
+  }
+  async getLoggedinUserPriviledges({
+    method,
+    priviledges,
+  }: Record<string, any>) {
+    const {
+      has_read_access,
+      has_add_access,
+      has_delete_access,
+      has_edit_access,
+    } = priviledges;
+    switch (method) {
+      case 'GET':
+        return has_read_access;
+      case 'POST':
+        return has_add_access;
+      case 'PUT':
+        return has_edit_access;
+      case 'DELETE':
+        return has_delete_access;
+      default:
+        return false;
+    }
   }
 }

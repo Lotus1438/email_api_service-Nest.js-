@@ -91,3 +91,9 @@ Nest is [MIT licensed](LICENSE).
 ## 0.0.4
 
 -Added: AuthGuards & RoleGuards Decorator
+
+## 0.0.5
+
+-Updated: RoleGuard
+-Added: User role Decorator with permission to access, message, user, user_role (Dto)
+-On going: Utility for statuses
