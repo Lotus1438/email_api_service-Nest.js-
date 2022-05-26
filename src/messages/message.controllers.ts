@@ -17,46 +17,26 @@ import { RoleService } from '../restriction/role/role.service';
 @Controller('message')
 export class MessageController {
   private logger: any;
+  private message_details: MessageDto;
   constructor(
     private messageService: MessageService,
     private utilityService: UtilityService,
     private roleService: RoleService,
   ) {
     this.logger = new Logger('MESSAGE');
+    this.message_details = new MessageDto();
   }
   @Post('/create')
   async createMessage(@Request() req: any, @Body() body: MessageDto) {
-    console.log(
-      '%c 🔙: MessageController -> createMessage -> req ',
-      'font-size:16px;background-color:#a6f0a2;color:black;',
-      req.headers.cookie,
-      console.log(
-        '%c 🏳️: MessageController -> createMessage -> req.headers.cookie ',
-        'font-size:16px;background-color:#b34b8a;color:white;',
-        req.headers.cookie,
-      ),
-    );
     const access_token = this.utilityService.decodeAccessToken(
       req.headers.cookie,
     );
-    console.log(
-      '%c #️⃣: MessageController -> createMessage -> access_token ',
-      'font-size:16px;background-color:#dd0c7d;color:white;',
-      access_token,
-    );
-    const loggedinUserRole = await this.roleService.getLoggedinUserRole(
-      access_token,
-    );
-    console.log(
-      '%c 😦: MessageController -> createMessage -> loggedinUserRole ',
-      'font-size:16px;background-color:#84d5b0;color:black;',
-      loggedinUserRole,
-    );
+    const { email } = await this.roleService.getLoggedinUser(access_token);
     const [table_name] = req.route.path
       .split('/')
       .filter((item: string) => item != '');
-    const params = { ...body };
-    // return await this.messageService.createMessage(table_name, params);
+    const params = { ...this.message_details, ...body, sender: email };
+    return await this.messageService.createMessage(table_name, params);
   }
 
   @Get('/')

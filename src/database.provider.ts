@@ -65,7 +65,7 @@ export class DatabaseService {
   async getRecordByFilter(
     database_name: string,
     table_name: string,
-    params: Record<string, any>,
+    params: any,
   ) {
     return await this.client
       .db(database_name)

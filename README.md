@@ -97,3 +97,8 @@ Nest is [MIT licensed](LICENSE).
 -Updated: RoleGuard
 -Added: User role Decorator with permission to access, message, user, user_role (Dto)
 -On going: Utility for statuses
+
+## 0.0.6
+
+-Added:Sending message, Receive message from the sender, Message can be draft, Message can be filter by menus, Menu (type)
+-On going: Statuses

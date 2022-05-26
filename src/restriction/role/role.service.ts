@@ -9,20 +9,27 @@ export class RoleService {
     private databaseService: DatabaseService,
   ) {}
 
-  async getLoggedinUserRole(access_token: string) {
+  async getLoggedinUser(access_token: string) {
     const decoded = this.jwtService.decode(access_token ?? '') as Record<
       string,
       any
     >;
-    const [{ role_id: login_user_role_id }] =
-      await this.databaseService.getRecordByFilter(DATABASE_NAME, 'user', {
+    const [user] = await this.databaseService.getRecordByFilter(
+      DATABASE_NAME,
+      'user',
+      {
         username: decoded?.username,
         password: decoded?.password,
-      });
+      },
+    );
+    return user;
+  }
+
+  async getLoggedinUserRole(role_id: string) {
     return await this.databaseService.getRecordById(
       DATABASE_NAME,
       'user_role',
-      login_user_role_id,
+      role_id,
     );
   }
   async getLoggedinUserPriviledges({

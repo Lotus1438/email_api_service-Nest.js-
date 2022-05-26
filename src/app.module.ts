@@ -1,4 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
@@ -7,7 +9,7 @@ import { UserRoleModule } from './user_role/user_role.modules';
 import { UserModule } from './user/user.module';
 import { LoginModule } from './login/login.module';
 import { MessageModule } from './messages/message.modules';
-import { JwtModule } from '@nestjs/jwt';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
     UserModule,
     LoginModule,
     MessageModule,
+    MenuModule,
     JwtModule.register({
       secret: 'secret',
       signOptions: { expiresIn: '1d' },
