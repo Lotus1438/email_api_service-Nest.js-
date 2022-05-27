@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database.provider';
+import { UserDto } from './user.dto';
+
 const { DATABASE_NAME = 'email_database' } = process.env;
 
 @Injectable()
 export class UserService {
   constructor(private databaseService: DatabaseService) {}
-  async createUser(table_name: string, params: Record<string, any>) {
+  async createUser(table_name: string, params: UserDto) {
+    console.log(
+      '%c 😢: UserService -> createUser -> params ',
+      'font-size:16px;background-color:#25fb81;color:black;',
+      params,
+    );
     return await this.databaseService.createRecord(
       DATABASE_NAME,
       table_name,

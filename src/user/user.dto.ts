@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export enum EUserStatuses {
   ACTIVE = 'active',
@@ -16,6 +16,8 @@ export class UserDto {
     this.email = '';
     this.password = '';
     this.username = '';
+    this.created_date = new Date().getTime();
+    this.updated_date = new Date().getTime();
   }
   @IsString()
   @IsNotEmpty()
@@ -35,11 +37,11 @@ export class UserDto {
 
   @IsString()
   @IsOptional()
-  address: string;
+  address?: string;
 
   @IsString()
   @IsOptional()
-  birthdate: string;
+  birthdate?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -52,4 +54,14 @@ export class UserDto {
   @IsString()
   @IsNotEmpty()
   username: string;
+
+  @IsNumber()
+  created_date: number;
+
+  @IsNumber()
+  updated_date: number;
+}
+
+export interface IUserParams {
+  user_id: string;
 }

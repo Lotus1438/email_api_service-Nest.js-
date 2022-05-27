@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database.provider';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 
-const accessTokenSecret = 'youraccesstokensecret';
 const app = express();
 app.use(cookieParser());
 const { DATABASE_NAME = 'email_database' } = process.env;

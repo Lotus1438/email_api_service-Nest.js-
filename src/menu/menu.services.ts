@@ -3,8 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../database.provider';
 import { UtilityService } from '../utils/utility.service';
 import { RoleService } from '../restriction/role/role.service';
-import { EMenuTypes } from './menu.type';
+import { EMenuTypes } from './menu.dto';
 import { EMessageStatuses } from '../messages/message.dto';
+import { reduce } from 'bluebird';
 
 const { DATABASE_NAME = 'email_database' } = process.env;
 
@@ -26,57 +27,63 @@ export class MenuService {
     menu_type,
     user_email,
   }: Record<string, any>) {
-    let filter_params = {};
-    let filtered_messages: Record<string, any>[] = [];
-
-    if (
-      menu_type === EMenuTypes.STARRED ||
-      menu_type === EMenuTypes.IMPORTANT
-    ) {
-      filtered_messages = await this.databaseService.getRecordByFilter(
-        DATABASE_NAME,
-        table_name,
-        (message: any) => {
-          return message('sender')
-            .eq(user_email)
-            .or(message('recipient').eq(user_email))
-            .and(message('status').eq(menu_type));
-        },
-      );
-    } else if (menu_type === EMenuTypes.INBOX) {
-      filtered_messages = await this.databaseService.getRecordByFilter(
-        DATABASE_NAME,
-        table_name,
-        (message: any) => {
-          return message('recipient')
-            .eq(user_email)
-            .and(message('status').ne(EMessageStatuses.DELETED));
-        },
-      );
-    } else if (menu_type === EMenuTypes.SENT) {
-      filtered_messages = await this.databaseService.getRecordByFilter(
-        DATABASE_NAME,
-        table_name,
-        (message: any) => {
-          return message('sender')
-            .eq(user_email)
-            .and(message('status').ne(EMessageStatuses.DELETED));
-        },
-      );
-    } else if (menu_type === EMenuTypes.DRAFT) {
-      filter_params = {
-        sender: user_email,
-        status: EMessageStatuses.DRAFT,
-      };
-      filtered_messages = await this.databaseService.getRecordByFilter(
-        DATABASE_NAME,
-        table_name,
-        filter_params,
-      );
-    } else {
-      filtered_messages = [];
+    switch (menu_type) {
+      case EMenuTypes.STARRED:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('sender')
+              .eq(user_email)
+              .or(message('recipient').eq(user_email))
+              .and(message('status').eq(EMessageStatuses.STARRED));
+          },
+        );
+      case EMenuTypes.IMPORTANT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('sender')
+              .eq(user_email)
+              .or(message('recipient').eq(user_email))
+              .and(message('status').eq(EMessageStatuses.IMPORTANT));
+          },
+        );
+      case EMenuTypes.INBOX:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('recipient')
+              .eq(user_email)
+              .and(message('status').ne(EMessageStatuses.DELETED))
+              .and(message('status').ne(EMessageStatuses.DRAFT));
+          },
+        );
+      case EMenuTypes.SENT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('sender')
+              .eq(user_email)
+              .and(message('status').ne(EMessageStatuses.DELETED))
+              .and(message('status').ne(EMessageStatuses.DRAFT));
+          },
+        );
+      case EMenuTypes.DRAFT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          {
+            sender: user_email,
+            status: EMessageStatuses.DRAFT,
+          },
+        );
+      default:
+        return [];
     }
-    return filtered_messages;
   }
 
   async getMessageById(table_name: string, id: string) {
@@ -103,11 +110,26 @@ export class MenuService {
         message_id,
         { status },
       );
-      console.log(
-        '%c 🍗: MenuService -> message ',
-        'font-size:16px;background-color:#24502d;color:white;',
-        message,
-      );
+      return message;
     }
+  }
+
+  async groupMessagesByMenu(
+    table_name: string,
+    menu_types: string[],
+    email: string,
+  ) {
+    return reduce(
+      menu_types,
+      async (acc: any, curr: any) => {
+        const messages = await this.getUserMessagesByMenuType({
+          table_name,
+          menu_type: curr,
+          user_email: email,
+        });
+        return { ...acc, [curr]: messages };
+      },
+      {},
+    );
   }
 }

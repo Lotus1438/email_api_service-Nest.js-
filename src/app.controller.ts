@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post, Req, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
+import { UserDto } from './user/user.dto';
+import { UtilityService } from './utils/utility.service';
 
 const {
   DATABASE_NAME = 'email_database',
@@ -9,12 +11,13 @@ const {
 
 const tables = TABLE_NAME.split(',');
 
-@Controller()
+@Controller('/register')
 export class AppController {
   private logger: any;
   constructor(
     private appService: AppService,
     private databaseService: DatabaseService,
+    private utilityService: UtilityService,
   ) {
     this.logger = new Logger('APP');
   }
@@ -29,6 +32,8 @@ export class AppController {
         has_edit_access: true,
         has_delete_access: true,
       },
+      created_date: new Date().getTime(),
+      updated_date: new Date().getTime(),
     };
     await this.databaseService.createDatabase(DATABASE_NAME);
     await this.databaseService.createTable(DATABASE_NAME, tables);
@@ -38,20 +43,17 @@ export class AppController {
       initialized_role,
     );
   }
-  @Post('/register_user')
-  registerUser(@Body() body: any, @Req() req: any) {
-    const { table_name, params } = body;
-    return this.appService.registerRecord(table_name, params);
+  @Post('/user')
+  registerUser(@Body() body: UserDto, @Req() req: any) {
+    return this.appService.registerRecord('user', body);
   }
-  @Get('/register_user')
-  getAllRegisterUser(@Body() body: any) {
-    const { table_name } = body;
-    return this.appService.getAllRegisterRecord(table_name);
+  @Get('/users')
+  getAllRegisterUser(@Req() req: any) {
+    return this.appService.getAllRegisterRecord('user');
   }
 
-  @Post('/register_user_role')
-  registerUserRole(@Body() body: any) {
-    const { table_name, params } = body;
-    return this.appService.registerRecord(table_name, params);
+  @Post('/user_role')
+  registerUserRole(@Body() body: any, @Req() req: any) {
+    return this.appService.registerRecord('user_role', body);
   }
 }

@@ -102,3 +102,8 @@ Nest is [MIT licensed](LICENSE).
 
 -Added:Sending message, Receive message from the sender, Message can be draft, Message can be filter by menus, Menu (type)
 -On going: Statuses
+
+## 0.0.7
+
+-Added: Menu (Inbox, Starred, Important, Sent, Draft), Status (important, starred, read, draft, deleted), Message is editale, Message can be draft or delete permanently
+-On going: User role authentication by priviledges

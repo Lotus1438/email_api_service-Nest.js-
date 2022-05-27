@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 
 export enum EMessageStatuses {
   IMPORTANT = 'Important',
@@ -16,6 +22,8 @@ export class MessageDto {
     this.message = '';
     this.sender = '';
     this.status = EMessageStatuses.UNREAD;
+    this.created_date = new Date().getTime();
+    this.updated_date = new Date().getTime();
   }
   @IsString()
   @IsNotEmpty()
@@ -40,4 +48,16 @@ export class MessageDto {
   })
   @IsNotEmpty()
   status: EMessageStatuses;
+
+  @IsNumber()
+  created_date: number;
+
+  @IsNumber()
+  updated_date: number;
+}
+export interface IUpdateMessageBody {
+  message: string;
+}
+export interface IMessageParams {
+  message_id: string;
 }

@@ -10,44 +10,52 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UserService } from './user.service';
 import { AuthGuard } from '../restriction/auth/auth.guard';
 import { RoleGuard } from '../restriction/role/role.guard';
-import { Request } from 'express';
+import { UtilityService } from '../utils/utility.service';
+import { UserDto, IUserParams } from './user.dto';
+
 @Controller('user')
 export class UserController {
-  private logger: any;
-  constructor(private userService: UserService) {
+  private logger: Logger;
+  constructor(
+    private userService: UserService,
+    private utilityService: UtilityService,
+  ) {
     this.logger = new Logger('USER');
   }
 
   @Post('/create')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async createUser(@Body() body: any) {
-    const { table_name, params } = body;
-    return await this.userService.createUser(table_name, params);
+  async createUser(@Body() body: UserDto, @Req() req: Request) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    return await this.userService.createUser(table_name, body);
   }
 
   @Get('/')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
   async getAllUser(@Req() req: Request) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
     return await this.userService.getAllUser(table_name);
   }
 
-  @Get('/:id')
+  @Get('/:user_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getUserById(@Param() params: any, @Req() req: any) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
-    const { id = '' } = params;
-    const result = await this.userService.getUserById(table_name, id);
+  async getUserById(@Param() params: IUserParams, @Req() req: Request) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    const { user_id = '' } = params;
+    const result = await this.userService.getUserById(table_name, user_id);
     return result
       ? { success: true, message: 'Fetched record', data: result }
       : {
@@ -56,22 +64,28 @@ export class UserController {
         };
   }
 
-  @Put('/:id')
+  @Put('/:user_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async updateUserById(@Body() body: any, @Param() { id }: any) {
-    const { table_name, params } = body;
-    return await this.userService.updateUserById(table_name, id, params);
+  async updateUserById(
+    @Body() body: Record<string, any>,
+    @Param() { user_id }: IUserParams,
+    @Req() req: Request,
+  ) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    return await this.userService.updateUserById(table_name, user_id, body);
   }
 
-  @Delete('/:id')
+  @Delete('/:user_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async deleteUserById(@Param() params: any, @Req() req: any) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
-    const { id = '' } = params;
-    return await this.userService.deleteUserById(table_name, id);
+  async deleteUserById(@Param() params: IUserParams, @Req() req: Request) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    const { user_id = '' } = params;
+    return await this.userService.deleteUserById(table_name, user_id);
   }
 }

@@ -1,6 +1,21 @@
-import { Controller, Get, Param, Request, Put, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Request,
+  Put,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { MenuService } from './menu.services';
-import { MenuParamsDto } from './menu.type';
+import { AuthGuard } from '../restriction/auth/auth.guard';
+import { RoleGuard } from '../restriction/role/role.guard';
+import {
+  GetMessagesByMenuParamsDto,
+  MenuBodyDto,
+  EMenuTypes,
+  IMenuParams,
+} from './menu.dto';
 
 @Controller('menu')
 export class MenuController {
@@ -9,9 +24,26 @@ export class MenuController {
     this.table_name = 'message';
   }
 
+  @Get('/')
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async getAllMenu(@Request() request: any) {
+    const { email } = await this.menuService.getLoggedinUser(
+      request.headers.cookie ?? '',
+    );
+    const menu_types = EMenuTypes;
+    return await this.menuService.groupMessagesByMenu(
+      this.table_name,
+      Object.values(menu_types),
+      email,
+    );
+  }
+
   @Get('/:menu_type')
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
   async getMessagesByMenuType(
-    @Param() params: MenuParamsDto,
+    @Param() params: GetMessagesByMenuParamsDto,
     @Request() request: any,
   ) {
     const { menu_type } = params;
@@ -26,17 +58,23 @@ export class MenuController {
   }
 
   @Get('/:menu_type/:message_id')
-  async getMessageInAMenuById(@Param() params: any) {
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async getMessageInAMenuById(@Param() params: IMenuParams) {
     const { message_id } = params;
     return await this.menuService.getMessageById(this.table_name, message_id);
   }
 
   @Put('/inbox/:message_id')
-  async updateInboxMessageStatusById(@Param() params: any, @Body() body: any) {
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async updateInboxMessageStatusById(
+    @Param() params: IMenuParams,
+    @Body() body: MenuBodyDto,
+  ) {
     const { message_id } = params;
     const { status } = body;
-    //TODO: check if status is not deleted, possible kay mag DTO
-    await this.menuService.updateInboxMessageStatus({
+    return await this.menuService.updateInboxMessageStatus({
       message_id,
       table_name: this.table_name,
       status,

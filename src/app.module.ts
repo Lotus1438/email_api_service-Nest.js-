@@ -10,6 +10,8 @@ import { UserModule } from './user/user.module';
 import { LoginModule } from './login/login.module';
 import { MessageModule } from './messages/message.modules';
 import { MenuModule } from './menu/menu.module';
+import { UtilityModule } from './utils/utility.module';
+import { UtilityService } from './utils/utility.service';
 
 @Module({
   imports: [
@@ -18,13 +20,14 @@ import { MenuModule } from './menu/menu.module';
     LoginModule,
     MessageModule,
     MenuModule,
+    UtilityModule,
     JwtModule.register({
       secret: 'secret',
       signOptions: { expiresIn: '1d' },
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, DatabaseService],
+  providers: [AppService, DatabaseService, UtilityService],
   exports: [AppService],
 })
 export class AppModule implements NestModule {

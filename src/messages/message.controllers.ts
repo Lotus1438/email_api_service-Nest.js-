@@ -7,10 +7,19 @@ import {
   Param,
   Body,
   Logger,
-  Request,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { MessageService } from './message.service';
-import { MessageDto } from './message.dto';
+import {
+  EMessageStatuses,
+  MessageDto,
+  IUpdateMessageBody,
+  IMessageParams,
+} from './message.dto';
+import { AuthGuard } from '../restriction/auth/auth.guard';
+import { RoleGuard } from '../restriction/role/role.guard';
 import { UtilityService } from '../utils/utility.service';
 import { RoleService } from '../restriction/role/role.service';
 
@@ -26,34 +35,44 @@ export class MessageController {
     this.logger = new Logger('MESSAGE');
     this.message_details = new MessageDto();
   }
+
   @Post('/create')
-  async createMessage(@Request() req: any, @Body() body: MessageDto) {
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async createMessage(@Req() req: Request, @Body() body: MessageDto) {
     const access_token = this.utilityService.decodeAccessToken(
-      req.headers.cookie,
+      req.headers.cookie ?? '',
     );
     const { email } = await this.roleService.getLoggedinUser(access_token);
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
     const params = { ...this.message_details, ...body, sender: email };
     return await this.messageService.createMessage(table_name, params);
   }
 
   @Get('/')
-  async getAllMessage(@Request() req: any) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async getAllMessage(@Req() req: Request) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
     return await this.messageService.getAllMessage(table_name);
   }
 
-  @Get('/:id')
-  async getMessageById(@Param() params: any, @Request() req: any) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
-    const { id = '' } = params;
-    const result = await this.messageService.getMessageById(table_name, id);
+  @Get('/:message_id')
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async getMessageById(@Param() params: IMessageParams, @Req() req: Request) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    const { message_id = '' } = params;
+    const result = await this.messageService.getMessageById(
+      table_name,
+      message_id,
+    );
     return result
       ? { success: true, message: 'Fetched record', data: result }
       : {
@@ -62,18 +81,47 @@ export class MessageController {
         };
   }
 
-  @Put('/:id')
-  async updateMessageById(@Body() body: any, @Param() { id }: any) {
-    const { table_name, params } = body;
-    return await this.messageService.updateMessageById(table_name, id, params);
+  @Put('/:message_id')
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async updateMessageById(
+    @Body() body: IUpdateMessageBody,
+    @Param() params: IMessageParams,
+    @Req() req: Request,
+  ) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    const { message_id = '' } = params;
+    const { message } = body;
+    const { status } = await this.messageService.getMessageById(
+      table_name,
+      message_id,
+    );
+    if (status === EMessageStatuses.DRAFT) {
+      return await this.messageService.updateMessageById(
+        table_name,
+        message_id,
+        {
+          message,
+        },
+      );
+    } else {
+      return { success: false, message: 'Only Draft messages can be edited.' };
+    }
   }
 
   @Delete('/:id')
-  async deleteMessageById(@Param() params: any, @Request() req: any) {
-    const [table_name] = req.route.path
-      .split('/')
-      .filter((item: string) => item != '');
-    const { id = '' } = params;
-    return await this.messageService.deleteMessageById(table_name, id);
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  async deleteMessageById(
+    @Param() params: IMessageParams,
+    @Req() req: Request,
+  ) {
+    const table_name = this.utilityService.getTableNameFromRoute(
+      req.route.path,
+    );
+    const { message_id = '' } = params;
+    return await this.messageService.deleteMessageById(table_name, message_id);
   }
 }

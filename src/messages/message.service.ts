@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database.provider';
+
 const { DATABASE_NAME = 'email_database' } = process.env;
 
 @Injectable()
