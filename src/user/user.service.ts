@@ -8,11 +8,6 @@ const { DATABASE_NAME = 'email_database' } = process.env;
 export class UserService {
   constructor(private databaseService: DatabaseService) {}
   async createUser(table_name: string, params: UserDto) {
-    console.log(
-      '%c 😢: UserService -> createUser -> params ',
-      'font-size:16px;background-color:#25fb81;color:black;',
-      params,
-    );
     return await this.databaseService.createRecord(
       DATABASE_NAME,
       table_name,

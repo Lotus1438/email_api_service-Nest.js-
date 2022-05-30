@@ -75,7 +75,13 @@ export class UserController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    return await this.userService.updateUserById(table_name, user_id, body);
+    const updated_params = { ...body, updated_date: new Date().getTime() };
+
+    return await this.userService.updateUserById(
+      table_name,
+      user_id,
+      updated_params,
+    );
   }
 
   @Delete('/:user_id')

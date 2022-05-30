@@ -26,22 +26,25 @@ export class RoleService {
   }
 
   async getLoggedinUserRole(role_id: string) {
-    return await this.databaseService.getRecordById(
+    const result = await this.databaseService.getRecordById(
       DATABASE_NAME,
       'user_role',
       role_id,
     );
+    if (result) return result;
+    else return { success: false, message: 'User role does not exist.' };
   }
   async getLoggedinUserPriviledges({
     method,
     priviledges,
   }: Record<string, any>) {
     const {
-      has_read_access,
-      has_add_access,
-      has_delete_access,
-      has_edit_access,
+      has_read_access = false,
+      has_add_access = false,
+      has_delete_access = false,
+      has_edit_access = false,
     } = priviledges;
+
     switch (method) {
       case 'GET':
         return has_read_access;

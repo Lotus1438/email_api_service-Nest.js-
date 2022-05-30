@@ -23,13 +23,12 @@ export class RoleGuard implements CanActivate {
     return this.handleRequest({ method, access_token });
   }
   async handleRequest({ method, access_token }: IRoleRequestParams) {
-    const { role_id } = await this.roleService.getLoggedinUser(access_token);
-    console.log(
-      '%c ⛵: RoleGuard -> handleRequest -> role_id ',
-      'font-size:16px;background-color:#d26a46;color:white;',
+    const { role_id = '' } = await this.roleService.getLoggedinUser(
+      access_token,
+    );
+    const { priviledges = {} } = await this.roleService.getLoggedinUserRole(
       role_id,
     );
-    const { priviledges } = await this.roleService.getLoggedinUserRole(role_id);
     return await this.roleService.getLoggedinUserPriviledges({
       method,
       priviledges,

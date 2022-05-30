@@ -80,11 +80,12 @@ export class UserRoleController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
+    const updated_params = { ...body, updated_date: new Date().getTime() };
     const { user_role_id = '' } = params;
     return await this.userRoleService.updateUserRoleById(
       table_name,
       user_role_id,
-      body,
+      updated_params,
     );
   }
 

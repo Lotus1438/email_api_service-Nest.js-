@@ -97,20 +97,112 @@ export class MenuService {
   async updateInboxMessageStatus({
     message_id,
     table_name,
-    status,
+    updated_params,
+    user_email,
   }: Record<string, any>) {
-    const { status: record_status } = await this.getMessageById(
+    const { recipient, status: record_status } = await this.getMessageById(
       table_name,
       message_id,
     );
-    if (status !== record_status) {
+    const { status } = updated_params;
+    if (
+      status !== record_status &&
+      recipient === user_email &&
+      (record_status !== EMessageStatuses.DRAFT ||
+        record_status !== EMessageStatuses.DELETED)
+    ) {
       const message = await this.databaseService.updateRecordById(
         DATABASE_NAME,
         table_name,
         message_id,
-        { status },
+        updated_params,
       );
       return message;
+    } else {
+      return { success: false, message: 'Message does not exist in Inbox.' };
+    }
+  }
+
+  async updateSentMessageStatus({
+    message_id,
+    table_name,
+    updated_params,
+    user_email,
+  }: Record<string, any>) {
+    const { sender, status: record_status } = await this.getMessageById(
+      table_name,
+      message_id,
+    );
+    const { status } = updated_params;
+    if (
+      status !== record_status &&
+      sender === user_email &&
+      (record_status !== EMessageStatuses.DRAFT ||
+        record_status !== EMessageStatuses.DELETED)
+    ) {
+      const message = await this.databaseService.updateRecordById(
+        DATABASE_NAME,
+        table_name,
+        message_id,
+        updated_params,
+      );
+      return message;
+    } else {
+      return { success: false, message: 'Message does not exist in Sentbox.' };
+    }
+  }
+
+  async updateDraftMessageStatus({
+    message_id,
+    table_name,
+    updated_params,
+    user_email,
+  }: Record<string, any>) {
+    const { sender, status: record_status } = await this.getMessageById(
+      table_name,
+      message_id,
+    );
+    if (sender === user_email && record_status === EMessageStatuses.DRAFT) {
+      const message = await this.databaseService.updateRecordById(
+        DATABASE_NAME,
+        table_name,
+        message_id,
+        updated_params,
+      );
+      return message;
+    } else {
+      return { success: false, message: 'Message does not exist in Draft.' };
+    }
+  }
+
+  async updateStarredOrImportantMessageStatus({
+    message_id,
+    table_name,
+    updated_params,
+    user_email,
+    menu_type,
+  }: Record<string, any>) {
+    const {
+      sender,
+      recipient,
+      status: record_status,
+    } = await this.getMessageById(table_name, message_id);
+    if (
+      (sender === user_email || recipient === user_email) &&
+      record_status !== EMessageStatuses.DELETED
+    ) {
+      const message = await this.databaseService.updateRecordById(
+        DATABASE_NAME,
+        table_name,
+        message_id,
+        updated_params,
+      );
+      return message;
+    } else {
+      return {
+        success: false,
+        message: `Message does not exist in ${menu_type}.`,
+      };
     }
   }
 

@@ -25,7 +25,7 @@ export class AppController {
   async onModuleInit() {
     const initialized_role = {
       id: '703f3215-e3ef-43a9-b8c2-2929721022a0',
-      role: 'Super Admin',
+      role: 'super_admin',
       priviledges: {
         has_read_access: true,
         has_add_access: true,

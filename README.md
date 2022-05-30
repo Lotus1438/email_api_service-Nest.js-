@@ -74,23 +74,19 @@ Nest is [MIT licensed](LICENSE).
 
 ## Changelogs
 
-## 0.0.1
+## 0.0.8
 
-- Initial Commit
+-Updated: Role guard, Menu (Inbox, Starred, Important, Sent, Draft), Status (important, starred, read, draft, deleted)
 
-## 0.0.2
+## 0.0.7
 
-- Added: user_role & register controller, module & service
-- Updated: authenticationMiddleware
+-Added: Menu (Inbox, Starred, Important, Sent, Draft), Status (important, starred, read, draft, deleted), Message is editale, Message can be draft or delete permanently
+-On going: User role authentication by priviledges
 
-## 0.0.3
+## 0.0.6
 
--Added: centralized log, bearer token, Login & Logout
--Updated: user_role, register, user, message (CRUD)
-
-## 0.0.4
-
--Added: AuthGuards & RoleGuards Decorator
+-Added:Sending message, Receive message from the sender, Message can be draft, Message can be filter by menus, Menu (type)
+-On going: Statuses
 
 ## 0.0.5
 
@@ -98,12 +94,20 @@ Nest is [MIT licensed](LICENSE).
 -Added: User role Decorator with permission to access, message, user, user_role (Dto)
 -On going: Utility for statuses
 
-## 0.0.6
+## 0.0.4
 
--Added:Sending message, Receive message from the sender, Message can be draft, Message can be filter by menus, Menu (type)
--On going: Statuses
+-Added: AuthGuards & RoleGuards Decorator
 
-## 0.0.7
+## 0.0.3
 
--Added: Menu (Inbox, Starred, Important, Sent, Draft), Status (important, starred, read, draft, deleted), Message is editale, Message can be draft or delete permanently
--On going: User role authentication by priviledges
+-Added: centralized log, bearer token, Login & Logout
+-Updated: user_role, register, user, message (CRUD)
+
+## 0.0.2
+
+- Added: user_role & register controller, module & service
+- Updated: authenticationMiddleware
+
+## 0.0.1
+
+- Initial Commit

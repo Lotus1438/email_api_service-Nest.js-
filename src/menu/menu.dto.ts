@@ -2,6 +2,7 @@ import { IsEnum } from 'class-validator';
 import { EMessageStatuses } from '../messages/message.dto';
 
 export interface IMenuParams {
+  menu_type?: string;
   message_id: string;
 }
 
@@ -28,7 +29,7 @@ export class GetMessagesByMenuParamsDto {
 
 export class MenuBodyDto {
   constructor() {
-    this.status = EMessageStatuses.READ;
+    this.status = EMessageStatuses.DELETED;
   }
 
   @IsEnum(EMessageStatuses, {

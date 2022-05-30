@@ -8,7 +8,6 @@ import {
   Body,
   Logger,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { MessageService } from './message.service';
@@ -18,8 +17,6 @@ import {
   IUpdateMessageBody,
   IMessageParams,
 } from './message.dto';
-import { AuthGuard } from '../restriction/auth/auth.guard';
-import { RoleGuard } from '../restriction/role/role.guard';
 import { UtilityService } from '../utils/utility.service';
 import { RoleService } from '../restriction/role/role.service';
 
@@ -37,8 +34,6 @@ export class MessageController {
   }
 
   @Post('/create')
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard)
   async createMessage(@Req() req: Request, @Body() body: MessageDto) {
     const access_token = this.utilityService.decodeAccessToken(
       req.headers.cookie ?? '',
@@ -52,8 +47,6 @@ export class MessageController {
   }
 
   @Get('/')
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard)
   async getAllMessage(@Req() req: Request) {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
@@ -62,8 +55,6 @@ export class MessageController {
   }
 
   @Get('/:message_id')
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard)
   async getMessageById(@Param() params: IMessageParams, @Req() req: Request) {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
@@ -82,8 +73,6 @@ export class MessageController {
   }
 
   @Put('/:message_id')
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard)
   async updateMessageById(
     @Body() body: IUpdateMessageBody,
     @Param() params: IMessageParams,
@@ -92,8 +81,9 @@ export class MessageController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    const { message_id = '' } = params;
     const { message } = body;
+    const updated_params = { message, updated_date: new Date().getTime() };
+    const { message_id = '' } = params;
     const { status } = await this.messageService.getMessageById(
       table_name,
       message_id,
@@ -102,18 +92,14 @@ export class MessageController {
       return await this.messageService.updateMessageById(
         table_name,
         message_id,
-        {
-          message,
-        },
+        updated_params,
       );
     } else {
       return { success: false, message: 'Only Draft messages can be edited.' };
     }
   }
 
-  @Delete('/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard)
+  @Delete('/:message_id')
   async deleteMessageById(
     @Param() params: IMessageParams,
     @Req() req: Request,

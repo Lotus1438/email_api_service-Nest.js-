@@ -2,8 +2,8 @@ import {
   Controller,
   Get,
   Param,
-  Request,
   Put,
+  Request,
   Body,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +16,7 @@ import {
   EMenuTypes,
   IMenuParams,
 } from './menu.dto';
+import { EMessageStatuses } from '../messages/message.dto';
 
 @Controller('menu')
 export class MenuController {
@@ -65,19 +66,79 @@ export class MenuController {
     return await this.menuService.getMessageById(this.table_name, message_id);
   }
 
-  @Put('/inbox/:message_id')
+  @Put('/:menu_type/:message_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async updateInboxMessageStatusById(
-    @Param() params: IMenuParams,
+  async updateMessageStatusById(
     @Body() body: MenuBodyDto,
+    @Param() params: IMenuParams,
+    @Request() request: any,
   ) {
-    const { message_id } = params;
+    const { email } = await this.menuService.getLoggedinUser(
+      request.headers.cookie,
+    );
+    const { menu_type, message_id } = params;
     const { status } = body;
-    return await this.menuService.updateInboxMessageStatus({
-      message_id,
-      table_name: this.table_name,
-      status,
-    });
+    const updated_params = { status, updated_date: new Date().getTime() };
+    switch (menu_type) {
+      case 'inbox':
+        if (
+          status === EMessageStatuses.UNREAD ||
+          status === EMessageStatuses.DRAFT
+        ) {
+          return {
+            success: false,
+            message: 'Cannot Update an inbox message status to unread or draft',
+          };
+        }
+        return await this.menuService.updateInboxMessageStatus({
+          message_id,
+          table_name: this.table_name,
+          user_email: email,
+          updated_params,
+        });
+      case 'sent':
+        if (
+          status === EMessageStatuses.UNREAD ||
+          status === EMessageStatuses.READ ||
+          status === EMessageStatuses.DRAFT
+        ) {
+          return {
+            success: false,
+            message:
+              'Cannot Update an sent message status to unread, read or draft',
+          };
+        }
+        return await this.menuService.updateSentMessageStatus({
+          message_id,
+          table_name: this.table_name,
+          updated_params,
+          user_email: email,
+        });
+      case 'draft':
+        if (
+          status === EMessageStatuses.UNREAD ||
+          status === EMessageStatuses.READ
+        ) {
+          return {
+            success: false,
+            message: 'Cannot Update an draft message status to unread, read',
+          };
+        }
+        return await this.menuService.updateDraftMessageStatus({
+          message_id,
+          table_name: this.table_name,
+          updated_params,
+          user_email: email,
+        });
+      default:
+        return await this.menuService.updateStarredOrImportantMessageStatus({
+          message_id,
+          table_name: this.table_name,
+          updated_params,
+          user_email: email,
+          menu_type,
+        });
+    }
   }
 }
