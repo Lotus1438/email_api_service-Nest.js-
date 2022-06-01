@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../../database.provider';
+
 const { DATABASE_NAME = 'email_database' } = process.env;
+
 @Injectable({})
 export class RoleService {
   constructor(

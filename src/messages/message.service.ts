@@ -38,12 +38,4 @@ export class MessageService {
       params,
     );
   }
-
-  async deleteMessageById(table_name: string, id: string) {
-    return await this.databaseService.deleteRecordById(
-      DATABASE_NAME,
-      table_name,
-      id,
-    );
-  }
 }

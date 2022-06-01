@@ -18,8 +18,7 @@ export class MenuService {
   ) {
     this.roleService = new RoleService(new JwtService(), this.databaseService);
   }
-  async getLoggedinUser(cookie: string) {
-    const access_token = this.utilityService.decodeAccessToken(cookie);
+  async getLoggedinUser(access_token: string) {
     return await this.roleService.getLoggedinUser(access_token);
   }
   async getUserMessagesByMenuType({
@@ -57,7 +56,6 @@ export class MenuService {
           (message: any) => {
             return message('recipient')
               .eq(user_email)
-              .and(message('status').ne(EMessageStatuses.DELETED))
               .and(message('status').ne(EMessageStatuses.DRAFT));
           },
         );
@@ -68,7 +66,6 @@ export class MenuService {
           (message: any) => {
             return message('sender')
               .eq(user_email)
-              .and(message('status').ne(EMessageStatuses.DELETED))
               .and(message('status').ne(EMessageStatuses.DRAFT));
           },
         );
@@ -108,8 +105,7 @@ export class MenuService {
     if (
       status !== record_status &&
       recipient === user_email &&
-      (record_status !== EMessageStatuses.DRAFT ||
-        record_status !== EMessageStatuses.DELETED)
+      record_status !== EMessageStatuses.DRAFT
     ) {
       const message = await this.databaseService.updateRecordById(
         DATABASE_NAME,
@@ -137,8 +133,7 @@ export class MenuService {
     if (
       status !== record_status &&
       sender === user_email &&
-      (record_status !== EMessageStatuses.DRAFT ||
-        record_status !== EMessageStatuses.DELETED)
+      record_status !== EMessageStatuses.DRAFT
     ) {
       const message = await this.databaseService.updateRecordById(
         DATABASE_NAME,
@@ -182,15 +177,11 @@ export class MenuService {
     user_email,
     menu_type,
   }: Record<string, any>) {
-    const {
-      sender,
-      recipient,
-      status: record_status,
-    } = await this.getMessageById(table_name, message_id);
-    if (
-      (sender === user_email || recipient === user_email) &&
-      record_status !== EMessageStatuses.DELETED
-    ) {
+    const { sender, recipient } = await this.getMessageById(
+      table_name,
+      message_id,
+    );
+    if (sender === user_email || recipient === user_email) {
       const message = await this.databaseService.updateRecordById(
         DATABASE_NAME,
         table_name,
@@ -223,5 +214,79 @@ export class MenuService {
       },
       {},
     );
+  }
+
+  async getMessageByMenuType(
+    table_name: string,
+    menu_type: string,
+    user_email: string,
+    message_id: string,
+  ) {
+    switch (menu_type) {
+      case EMenuTypes.DRAFT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          {
+            status: EMessageStatuses.DRAFT,
+            sender: user_email,
+            id: message_id,
+          },
+        );
+      case EMenuTypes.IMPORTANT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('status')
+              .eq(EMessageStatuses.IMPORTANT)
+              .and(message('id').eq(message_id))
+              .and(
+                message('sender')
+                  .eq(user_email)
+                  .or(message('recipient').eq(user_email)),
+              );
+          },
+        );
+      case EMenuTypes.INBOX:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('status')
+              .ne(EMessageStatuses.DRAFT)
+              .and(message('id').eq(message_id))
+              .and(message('recipient').eq(user_email));
+          },
+        );
+      case EMenuTypes.STARRED:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('status')
+              .eq(EMessageStatuses.STARRED)
+              .and(message('id').eq(message_id))
+              .and(
+                message('sender')
+                  .eq(user_email)
+                  .or(message('recipient').eq(user_email)),
+              );
+          },
+        );
+      case EMenuTypes.SENT:
+        return await this.databaseService.getRecordByFilter(
+          DATABASE_NAME,
+          table_name,
+          (message: any) => {
+            return message('status')
+              .ne(EMessageStatuses.DRAFT)
+              .and(message('id').eq(message_id))
+              .and(message('sender').eq(user_email));
+          },
+        );
+      default:
+        return [];
+    }
   }
 }

@@ -74,6 +74,11 @@ Nest is [MIT licensed](LICENSE).
 
 ## Changelogs
 
+## 0.0.9
+
+-Added - filter by menus
+-Updated - AuthGuard(access_token), Message can be deleted permanently
+
 ## 0.0.8
 
 -Updated: Role guard, Menu (Inbox, Starred, Important, Sent, Draft), Status (important, starred, read, draft, deleted)

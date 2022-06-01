@@ -642,3 +642,25 @@
 2022-05-30T06:52:41.687969709 1.850674s info: Table 8b208327-b22d-4d4a-8a29-924d3da97856: This server is Raft leader for term 10. Latest log index is 27.
 2022-05-30T06:52:41.752387193 1.915092s info: Table 93f3a891-4ba5-4618-8888-fe00b4b32d3a: Starting a new Raft election for term 9.
 2022-05-30T06:52:41.754306562 1.917011s info: Table 93f3a891-4ba5-4618-8888-fe00b4b32d3a: This server is Raft leader for term 9. Latest log index is 24.
+2022-06-01T06:35:22.062170858 0.027186s notice: Running rethinkdb 2.4.2~0focal (GCC 9.4.0)...
+2022-06-01T06:35:22.064491019 0.029508s notice: Running on Linux 5.17.5-76051705-generic x86_64
+2022-06-01T06:35:22.064573631 0.029588s notice: Loading data from directory /home/dnauser/Desktop/email_api_service/email-api-service/rethinkdb_data
+2022-06-01T06:35:22.081081546 0.046096s info: Automatically using cache size of 7285 MB
+2022-06-01T06:35:22.083426517 0.048441s notice: Listening for intracluster connections on port 29015
+2022-06-01T06:35:22.152529458 0.117544s notice: Listening for client driver connections on port 28015
+2022-06-01T06:35:22.152575754 0.117590s notice: Listening for administrative HTTP connections on port 8080
+2022-06-01T06:35:22.152576146 0.117591s notice: Listening on cluster addresses: 127.0.0.1, ::1
+2022-06-01T06:35:22.152586485 0.117601s notice: Listening on driver addresses: 127.0.0.1, ::1
+2022-06-01T06:35:22.152590395 0.117605s notice: Listening on http addresses: 127.0.0.1, ::1
+2022-06-01T06:35:22.152592105 0.117607s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2022-06-01T06:35:22.152594006 0.117609s notice: Server ready, "pop_os_lg6" 1b249b01-5d6c-44a4-838b-dc1c68089f1f
+2022-06-01T06:35:23.393692936 1.358708s info: Table 06c11e4c-fe65-49c7-b7ad-dc046ce03f84: Starting a new Raft election for term 11.
+2022-06-01T06:35:23.402974917 1.367990s info: Table 06c11e4c-fe65-49c7-b7ad-dc046ce03f84: This server is Raft leader for term 11. Latest log index is 30.
+2022-06-01T06:35:23.476465352 1.441480s info: Table 93f3a891-4ba5-4618-8888-fe00b4b32d3a: Starting a new Raft election for term 10.
+2022-06-01T06:35:23.478221103 1.443236s info: Table 93f3a891-4ba5-4618-8888-fe00b4b32d3a: This server is Raft leader for term 10. Latest log index is 27.
+2022-06-01T06:35:23.544004749 1.509019s info: Table 8b208327-b22d-4d4a-8a29-924d3da97856: Starting a new Raft election for term 11.
+2022-06-01T06:35:23.545867133 1.510882s info: Table 8b208327-b22d-4d4a-8a29-924d3da97856: This server is Raft leader for term 11. Latest log index is 30.
+2022-06-01T06:35:23.868833814 1.833849s info: Table 3737e857-bb53-496d-a103-b03b54cf852b: Starting a new Raft election for term 11.
+2022-06-01T06:35:23.870564130 1.835579s info: Table 3737e857-bb53-496d-a103-b03b54cf852b: This server is Raft leader for term 11. Latest log index is 30.
+2022-06-01T06:35:23.959834677 1.924849s info: Table e1e36588-5f02-47d8-8a0d-ec8d080f6ab7: Starting a new Raft election for term 11.
+2022-06-01T06:35:23.961464271 1.926479s info: Table e1e36588-5f02-47d8-8a0d-ec8d080f6ab7: This server is Raft leader for term 11. Latest log index is 30.

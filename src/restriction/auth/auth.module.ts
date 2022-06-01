@@ -1,12 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
-import { UtilityModule } from '../../utils/utility.module';
-import { UtilityService } from '../../utils/utility.service';
+import { RoleService } from '../role/role.service';
+import { RoleModule } from '../role/role.module';
+import { JwtModule } from '@nestjs/jwt';
+import { DatabaseService } from '../../database.provider';
 
 @Module({
-  imports: [UtilityModule],
-  providers: [AuthService, AuthGuard, UtilityService],
-  exports: [AuthService, UtilityService],
+  imports: [
+    RoleModule,
+    JwtModule.register({
+      secret: 'secret',
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
+  providers: [AuthService, AuthGuard, RoleService, DatabaseService],
+  exports: [AuthService, RoleService],
 })
 export class AuthModule {}

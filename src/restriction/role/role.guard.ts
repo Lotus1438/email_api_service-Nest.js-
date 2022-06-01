@@ -6,28 +6,22 @@ import {
 } from '@nestjs/common';
 import { IRoleRequestParams } from './role.type';
 import { RoleService } from './role.service';
-import { UtilityService } from '../../utils/utility.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(
-    private roleService: RoleService,
-    private utilityService: UtilityService,
-  ) {}
+  constructor(private roleService: RoleService) {}
 
   canActivate(context: ExecutionContext): Promise<boolean> | boolean {
-    const cookie = context.getArgs()[1].req.headers.cookie;
+    const access_token = context.getArgs()[1].req.cookies.access_token;
     const method = context.getArgs()[0].method;
-    const access_token = this.utilityService.decodeAccessToken(cookie);
     if (!access_token) throw new ForbiddenException();
     return this.handleRequest({ method, access_token });
   }
   async handleRequest({ method, access_token }: IRoleRequestParams) {
-    const { role_id = '' } = await this.roleService.getLoggedinUser(
-      access_token,
-    );
+    const user = await this.roleService.getLoggedinUser(access_token);
+    if (!user) return false;
     const { priviledges = {} } = await this.roleService.getLoggedinUserRole(
-      role_id,
+      user.role_id,
     );
     return await this.roleService.getLoggedinUserPriviledges({
       method,

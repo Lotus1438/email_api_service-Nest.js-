@@ -1,10 +1,6 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
-import express, { Response } from 'express';
+import { Response } from 'express';
 import { LoginService } from './login.service';
-
-const app = express();
-app.use(cookieParser());
 
 @Controller()
 export class LoginController {

@@ -1,10 +1,5 @@
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsString, IsOptional } from 'class-validator';
 import { EMessageStatuses } from '../messages/message.dto';
-
-export interface IMenuParams {
-  menu_type?: string;
-  message_id: string;
-}
 
 export enum EMenuTypes {
   INBOX = 'inbox',
@@ -14,13 +9,18 @@ export enum EMenuTypes {
   DRAFT = 'draft',
 }
 
-export class GetMessagesByMenuParamsDto {
+export class MenuParamsDto {
   constructor() {
+    this.message_id = '';
     this.menu_type = EMenuTypes.SENT;
   }
 
+  @IsString()
+  @IsOptional()
+  message_id?: string;
+
   @IsEnum(EMenuTypes, {
-    message: `Message must be a valid enum value [${Object.values(
+    message: `Menu type must be a valid enum value [${Object.values(
       EMenuTypes,
     )}]`,
   })
@@ -29,7 +29,7 @@ export class GetMessagesByMenuParamsDto {
 
 export class MenuBodyDto {
   constructor() {
-    this.status = EMessageStatuses.DELETED;
+    this.status = EMessageStatuses.READ;
   }
 
   @IsEnum(EMessageStatuses, {

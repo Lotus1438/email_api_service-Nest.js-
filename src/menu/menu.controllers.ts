@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   Put,
+  Delete,
   Request,
   Body,
   UseGuards,
@@ -10,18 +11,19 @@ import {
 import { MenuService } from './menu.services';
 import { AuthGuard } from '../restriction/auth/auth.guard';
 import { RoleGuard } from '../restriction/role/role.guard';
-import {
-  GetMessagesByMenuParamsDto,
-  MenuBodyDto,
-  EMenuTypes,
-  IMenuParams,
-} from './menu.dto';
+import { MenuParamsDto, MenuBodyDto, EMenuTypes } from './menu.dto';
 import { EMessageStatuses } from '../messages/message.dto';
+import { DatabaseService } from '../database.provider';
+
+const { DATABASE_NAME = 'email_database' } = process.env;
 
 @Controller('menu')
 export class MenuController {
   private table_name: string;
-  constructor(private menuService: MenuService) {
+  constructor(
+    private menuService: MenuService,
+    private databaseService: DatabaseService,
+  ) {
     this.table_name = 'message';
   }
 
@@ -30,7 +32,7 @@ export class MenuController {
   @UseGuards(RoleGuard)
   async getAllMenu(@Request() request: any) {
     const { email } = await this.menuService.getLoggedinUser(
-      request.headers.cookie ?? '',
+      request.cookies.access_token,
     );
     const menu_types = EMenuTypes;
     return await this.menuService.groupMessagesByMenu(
@@ -44,12 +46,12 @@ export class MenuController {
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
   async getMessagesByMenuType(
-    @Param() params: GetMessagesByMenuParamsDto,
+    @Param() params: MenuParamsDto,
     @Request() request: any,
   ) {
     const { menu_type } = params;
     const { email } = await this.menuService.getLoggedinUser(
-      request.headers.cookie,
+      request.cookies.access_token,
     );
     return await this.menuService.getUserMessagesByMenuType({
       table_name: this.table_name,
@@ -61,9 +63,27 @@ export class MenuController {
   @Get('/:menu_type/:message_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getMessageInAMenuById(@Param() params: IMenuParams) {
-    const { message_id } = params;
-    return await this.menuService.getMessageById(this.table_name, message_id);
+  async getMessageInAMenuById(
+    @Param() params: MenuParamsDto,
+    @Request() request: any,
+  ) {
+    const { message_id = '', menu_type = '' } = params;
+    const { email } = await this.menuService.getLoggedinUser(
+      request.cookies.access_token,
+    );
+    const [result] = await this.menuService.getMessageByMenuType(
+      this.table_name,
+      menu_type,
+      email,
+      message_id,
+    );
+    if (!result) {
+      return {
+        success: false,
+        message: `Message does not exist on Menu type ${menu_type}`,
+      };
+    }
+    return result;
   }
 
   @Put('/:menu_type/:message_id')
@@ -71,11 +91,11 @@ export class MenuController {
   @UseGuards(RoleGuard)
   async updateMessageStatusById(
     @Body() body: MenuBodyDto,
-    @Param() params: IMenuParams,
+    @Param() params: MenuParamsDto,
     @Request() request: any,
   ) {
     const { email } = await this.menuService.getLoggedinUser(
-      request.headers.cookie,
+      request.cookies.access_token,
     );
     const { menu_type, message_id } = params;
     const { status } = body;
@@ -106,7 +126,7 @@ export class MenuController {
           return {
             success: false,
             message:
-              'Cannot Update an sent message status to unread, read or draft',
+              'Cannot Update sent message status to unread, read or draft',
           };
         }
         return await this.menuService.updateSentMessageStatus({
@@ -122,7 +142,7 @@ export class MenuController {
         ) {
           return {
             success: false,
-            message: 'Cannot Update an draft message status to unread, read',
+            message: 'Cannot Update draft message status to unread, read',
           };
         }
         return await this.menuService.updateDraftMessageStatus({
@@ -140,5 +160,34 @@ export class MenuController {
           menu_type,
         });
     }
+  }
+
+  @Delete('/:menu_type/:message_id')
+  @UseGuards(AuthGuard)
+  async deleteMessageByMenuType(
+    @Param() params: MenuParamsDto,
+    @Request() request: any,
+  ) {
+    const { email } = await this.menuService.getLoggedinUser(
+      request.cookies.access_token,
+    );
+    const { message_id = '', menu_type } = params;
+    const [record] = await this.menuService.getMessageByMenuType(
+      this.table_name,
+      menu_type,
+      email,
+      message_id,
+    );
+    if (!record) {
+      return {
+        success: false,
+        message: `Message does not exist in ${menu_type}`,
+      };
+    }
+    return await this.databaseService.deleteRecordById(
+      DATABASE_NAME,
+      this.table_name,
+      message_id,
+    );
   }
 }

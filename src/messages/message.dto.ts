@@ -11,7 +11,6 @@ export enum EMessageStatuses {
   STARRED = 'Starred',
   READ = 'Read',
   DRAFT = 'Draft',
-  DELETED = 'Deleted',
   UNREAD = 'Unread',
 }
 

@@ -105,6 +105,6 @@ export class DatabaseService {
       .run();
     return deleted
       ? { success: true, message: 'Deleted successfully' }
-      : { success: false, message: 'Fail to delete record' };
+      : { success: false, message: 'Record does not exist' };
   }
 }

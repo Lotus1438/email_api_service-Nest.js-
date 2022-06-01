@@ -3,8 +3,6 @@ import { RoleService } from './role.service';
 import { JwtModule } from '@nestjs/jwt';
 import { RoleGuard } from './role.guard';
 import { DatabaseService } from '../../database.provider';
-import { UtilityService } from '../../utils/utility.service';
-import { UtilityModule } from '../../utils/utility.module';
 
 @Module({
   imports: [
@@ -12,10 +10,8 @@ import { UtilityModule } from '../../utils/utility.module';
       secret: 'secret',
       signOptions: { expiresIn: '1d' },
     }),
-    UtilityService,
-    UtilityModule,
   ],
   providers: [RoleService, RoleGuard, DatabaseService],
-  exports: [RoleService, UtilityService],
+  exports: [RoleService],
 })
 export class RoleModule {}
