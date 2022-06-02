@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import rethinkdbdash from 'rethinkdbdash';
 import Bluebird from 'bluebird';
+import { UserDto } from './user/user.dto';
+import { IResponse } from './main.type';
+const { HOST = 'localhost', PORT = '28015' } = process.env;
 
 @Injectable()
 export class DatabaseService {
@@ -8,8 +11,8 @@ export class DatabaseService {
   private logger: any;
   constructor() {
     const config = {
-      host: 'localhost',
-      port: 28015,
+      host: HOST,
+      port: Number(PORT),
     };
     this.client = rethinkdbdash(config);
     this.logger = new Logger('DATABASE PROVIDER');
@@ -30,22 +33,20 @@ export class DatabaseService {
       }
     });
   }
+
   async login(
     database_name: string,
     table_name: string,
     params: Record<string, any>,
-  ) {
-    return await this.client
-      .db(database_name)
-      .table(table_name)
-      .filter(params)
-      .run();
+  ): Promise<UserDto[]> {
+    return this.client.db(database_name).table(table_name).filter(params).run();
   }
+
   async createRecord(
     database_name: string,
     table_name: string,
     params: Record<string, any>,
-  ) {
+  ): Promise<IResponse> {
     const { id = '' } = params;
     const record = await this.getRecordById(database_name, table_name, id);
     if (!record) {
@@ -57,31 +58,38 @@ export class DatabaseService {
       if (inserted) {
         return { success: true, message: 'Inserted successfully' };
       }
-    } else return { success: false, message: 'Record already existed' };
+      return { success: false, message: 'Failed to insert.' };
+    }
+
+    return { success: false, message: 'Record already existed' };
   }
-  async getRecordById(database_name: string, table_name: string, id: string) {
-    return await this.client.db(database_name).table(table_name).get(id);
+
+  async getRecordById(
+    database_name: string,
+    table_name: string,
+    id: string,
+  ): Promise<Record<string, any>> {
+    return this.client.db(database_name).table(table_name).get(id);
   }
   async getRecordByFilter(
     database_name: string,
     table_name: string,
     params: any,
-  ) {
-    return await this.client
-      .db(database_name)
-      .table(table_name)
-      .filter(params)
-      .run();
+  ): Promise<Record<string, any>[]> {
+    return this.client.db(database_name).table(table_name).filter(params).run();
   }
-  async getAllRecord(database_name: string, table_name: string) {
-    return await this.client.db(database_name).table(table_name).run();
+  async getAllRecord(
+    database_name: string,
+    table_name: string,
+  ): Promise<Record<string, any>[]> {
+    return this.client.db(database_name).table(table_name).run();
   }
   async updateRecordById(
     database_name: string,
     table_name: string,
     id: string,
     params: Record<string, any>,
-  ) {
+  ): Promise<IResponse> {
     const { replaced } = await this.client
       .db(database_name)
       .table(table_name)
@@ -92,11 +100,12 @@ export class DatabaseService {
       ? { success: true, message: 'Updated successfully' }
       : { success: false, message: 'Fail to update record' };
   }
+
   async deleteRecordById(
     database_name: string,
     table_name: string,
     id: string,
-  ) {
+  ): Promise<IResponse> {
     const { deleted } = await this.client
       .db(database_name)
       .table(table_name)

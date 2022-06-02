@@ -74,6 +74,13 @@ Nest is [MIT licensed](LICENSE).
 
 ## Changelogs
 
+## 0.0.10
+
+-Added - reply function, main.type.ts, login.dto.ts
+-Updated - fixing undefined variables, .env, Message can be deleted permanently,
+-Ongoing - adding response types
+
+
 ## 0.0.9
 
 -Added - filter by menus

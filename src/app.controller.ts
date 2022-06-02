@@ -2,14 +2,12 @@ import { Body, Controller, Get, Post, Req, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
 import { UserDto } from './user/user.dto';
-import { UtilityService } from './utils/utility.service';
 
 const {
   DATABASE_NAME = 'email_database',
-  TABLE_NAME = 'register,user,user_role,message',
+  TABLE_NAMES = 'user,user_role,message',
 } = process.env;
-
-const tables = TABLE_NAME.split(',');
+const tables = TABLE_NAMES.split(',');
 
 @Controller('/register')
 export class AppController {
@@ -17,7 +15,6 @@ export class AppController {
   constructor(
     private appService: AppService,
     private databaseService: DatabaseService,
-    private utilityService: UtilityService,
   ) {
     this.logger = new Logger('APP');
   }

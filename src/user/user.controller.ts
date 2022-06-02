@@ -20,10 +20,12 @@ import { UserDto, IUserParams } from './user.dto';
 @Controller('user')
 export class UserController {
   private logger: Logger;
+  private user_details:UserDto;
   constructor(
     private userService: UserService,
     private utilityService: UtilityService,
-  ) {
+    ) {
+    this.user_details=new UserDto();
     this.logger = new Logger('USER');
   }
 
@@ -34,7 +36,7 @@ export class UserController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    return await this.userService.createUser(table_name, body);
+    return this.userService.createUser(table_name, {...this.user_details, ...body });
   }
 
   @Get('/')
@@ -44,7 +46,7 @@ export class UserController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    return await this.userService.getAllUser(table_name);
+    return this.userService.getAllUser(table_name);
   }
 
   @Get('/:user_id')
@@ -77,7 +79,7 @@ export class UserController {
     );
     const updated_params = { ...body, updated_date: new Date().getTime() };
 
-    return await this.userService.updateUserById(
+    return this.userService.updateUserById(
       table_name,
       user_id,
       updated_params,
@@ -92,6 +94,6 @@ export class UserController {
       req.route.path,
     );
     const { user_id = '' } = params;
-    return await this.userService.deleteUserById(table_name, user_id);
+    return this.userService.deleteUserById(table_name, user_id);
   }
 }

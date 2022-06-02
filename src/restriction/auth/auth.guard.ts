@@ -1,4 +1,4 @@
-import { CanActivate, Injectable, ExecutionContext } from '@nestjs/common';
+import { CanActivate, Injectable, ExecutionContext, BadRequestException } from '@nestjs/common';
 import { RoleService } from '../role/role.service';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../../database.provider';
@@ -12,9 +12,11 @@ export class AuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): Promise<boolean> | boolean {
     const access_token = context.getArgs()[1].req.cookies.access_token;
+    if(!access_token) return false
     return !!this.handleRequest(access_token);
   }
   async handleRequest(access_token: string) {
-    return await this.roleService.getLoggedinUser(access_token);
+    
+    const response = await this.roleService.getLoggedinUser(access_token);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../../database.provider';
 
@@ -13,8 +13,8 @@ export class RoleService {
 
   async getLoggedinUser(access_token: string) {
     const decoded = this.jwtService.decode(access_token ?? '') as Record<
-      string,
-      any
+    string,
+    any
     >;
     const [user] = await this.databaseService.getRecordByFilter(
       DATABASE_NAME,

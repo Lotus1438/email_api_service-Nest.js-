@@ -7,12 +7,13 @@ import {
   Request,
   Body,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { MenuService } from './menu.services';
 import { AuthGuard } from '../restriction/auth/auth.guard';
 import { RoleGuard } from '../restriction/role/role.guard';
-import { MenuParamsDto, MenuBodyDto, EMenuTypes } from './menu.dto';
-import { EMessageStatuses } from '../messages/message.dto';
+import { MenuParamsDto, EMenuTypes, MenuBodyDto } from './menu.dto';
+import { EMessageStatuses, MessageDto } from '../messages/message.dto';
 import { DatabaseService } from '../database.provider';
 
 const { DATABASE_NAME = 'email_database' } = process.env;
@@ -20,22 +21,28 @@ const { DATABASE_NAME = 'email_database' } = process.env;
 @Controller('menu')
 export class MenuController {
   private table_name: string;
+  private message_details: MessageDto;
+  private reply_message_indicator: string;
   constructor(
     private menuService: MenuService,
     private databaseService: DatabaseService,
   ) {
     this.table_name = 'message';
+    this.message_details = new MessageDto();
+    this.reply_message_indicator = 'Reply: ';
   }
 
   @Get('/')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getAllMenu(@Request() request: any) {
+  async getAllMenu(
+    @Request() request: any,
+  ): Promise<Record<EMenuTypes, MessageDto[]>[]> {
     const { email } = await this.menuService.getLoggedinUser(
       request.cookies.access_token,
     );
     const menu_types = EMenuTypes;
-    return await this.menuService.groupMessagesByMenu(
+    return this.menuService.groupMessagesByMenu(
       this.table_name,
       Object.values(menu_types),
       email,
@@ -53,7 +60,7 @@ export class MenuController {
     const { email } = await this.menuService.getLoggedinUser(
       request.cookies.access_token,
     );
-    return await this.menuService.getUserMessagesByMenuType({
+    return this.menuService.getUserMessagesByMenuType({
       table_name: this.table_name,
       menu_type,
       user_email: email,
@@ -84,6 +91,49 @@ export class MenuController {
       };
     }
     return result;
+  }
+
+  @Post('/:menu_type/:message_id')
+  async replyMessageByMessageId(
+    @Param() params: MenuParamsDto,
+    @Body() body: MessageDto,
+    @Request() request: any,
+  ) {
+    const { message_id = '', menu_type = '' } = params;
+    const { email } = await this.menuService.getLoggedinUser(
+      request.cookies.access_token,
+    );
+    const [result] = await this.menuService.getMessageByMenuType(
+      this.table_name,
+      menu_type,
+      email,
+      message_id,
+    );
+    if (!result) {
+      return {
+        success: false,
+        message: `Message does not exist in Menu type ${menu_type}`,
+      };
+    }
+    const { sender } = result;
+    const { message } = body;
+    const reply_message = {
+      ...this.message_details,
+      ...body,
+      message: this.reply_message_indicator + message,
+      sender: email,
+      recipient: sender,
+      replied_message_id: message_id,
+    };
+    const { success } = await this.menuService.createReplyMessage(
+      this.table_name,
+      reply_message,
+    );
+    if (success) {
+      return { success: true, message: 'Reply Sent!' };
+    } else {
+      return { success: false, message: 'Reply failed to sent!' };
+    }
   }
 
   @Put('/:menu_type/:message_id')

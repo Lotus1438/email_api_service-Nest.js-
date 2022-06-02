@@ -4,7 +4,7 @@ import { DatabaseService } from '../database.provider';
 import { UtilityService } from '../utils/utility.service';
 import { RoleService } from '../restriction/role/role.service';
 import { EMenuTypes } from './menu.dto';
-import { EMessageStatuses } from '../messages/message.dto';
+import { EMessageStatuses, MessageDto } from '../messages/message.dto';
 import { reduce } from 'bluebird';
 
 const { DATABASE_NAME = 'email_database' } = process.env;
@@ -25,10 +25,10 @@ export class MenuService {
     table_name,
     menu_type,
     user_email,
-  }: Record<string, any>) {
+  }: Record<string, any>): Promise<Record<string,any>[]> {
     switch (menu_type) {
       case EMenuTypes.STARRED:
-        return await this.databaseService.getRecordByFilter(
+        return this.databaseService.getRecordByFilter(
           DATABASE_NAME,
           table_name,
           (message: any) => {
@@ -88,6 +88,14 @@ export class MenuService {
       DATABASE_NAME,
       table_name,
       id,
+    );
+  }
+
+  async createReplyMessage(table_name: string, params: Record<string, any>) {
+    return await this.databaseService.createRecord(
+      DATABASE_NAME,
+      table_name,
+      params,
     );
   }
 

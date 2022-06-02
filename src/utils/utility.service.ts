@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-@Injectable({})
+@Injectable()
 export class UtilityService {
-  constructor() {}
-
   getTableNameFromRoute(route_path: string) {
     const [table_name] = route_path
       .split('/')

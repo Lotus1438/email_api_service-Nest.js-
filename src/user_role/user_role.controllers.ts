@@ -21,11 +21,13 @@ import { UserRoleDto, IUserRoleParams } from './user_role.dto';
 @Controller('user_role')
 export class UserRoleController {
   private logger: any;
+  private user_role_details:UserRoleDto;
   constructor(
     private userRoleService: UserRoleService,
     private utilityService: UtilityService,
   ) {
     this.logger = new Logger('USER ROLE');
+    this.user_role_details = new UserRoleDto();
   }
 
   @Post('/create')
@@ -35,7 +37,7 @@ export class UserRoleController {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    return await this.userRoleService.createUserRole(table_name, body);
+    return this.userRoleService.createUserRole(table_name, {...this.user_role_details ,...body});
   }
 
   @Get('/')
@@ -46,7 +48,7 @@ export class UserRoleController {
       req.route.path,
     );
     this.logger.log(this.getAllUserRole);
-    return await this.userRoleService.getAllUserRole(table_name);
+    return this.userRoleService.getAllUserRole(table_name);
   }
 
   @Get('/:user_role_id')
@@ -82,7 +84,7 @@ export class UserRoleController {
     );
     const updated_params = { ...body, updated_date: new Date().getTime() };
     const { user_role_id = '' } = params;
-    return await this.userRoleService.updateUserRoleById(
+    return this.userRoleService.updateUserRoleById(
       table_name,
       user_role_id,
       updated_params,
@@ -100,7 +102,7 @@ export class UserRoleController {
       req.route.path,
     );
     const { user_role_id = '' } = params;
-    return await this.userRoleService.deleteUserRoleById(
+    return this.userRoleService.deleteUserRoleById(
       table_name,
       user_role_id,
     );
