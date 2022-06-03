@@ -5,7 +5,6 @@ import {
   Put,
   Param,
   Body,
-  Logger,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -20,23 +19,22 @@ import {
 import { UtilityService } from '../utils/utility.service';
 import { RoleService } from '../restriction/role/role.service';
 import { AuthGuard } from '../restriction/auth/auth.guard';
+import { IResponse } from '../main.type';
 
 @Controller('message')
 export class MessageController {
-  private logger: any;
   private message_details: MessageDto;
   constructor(
     private messageService: MessageService,
     private utilityService: UtilityService,
     private roleService: RoleService,
   ) {
-    this.logger = new Logger('MESSAGE');
     this.message_details = new MessageDto();
   }
 
   @Post('/create')
   @UseGuards(AuthGuard)
-  async createMessage(@Req() req: Request, @Body() body: MessageDto) {
+  async createMessage(@Req() req: Request, @Body() body: MessageDto): Promise<IResponse<MessageDto>> {
     const { email } = await this.roleService.getLoggedinUser(
       req.cookies.access_token,
     );
@@ -44,35 +42,29 @@ export class MessageController {
       req.route.path,
     );
     const params = { ...this.message_details, ...body, sender: email };
-    return await this.messageService.createMessage(table_name, params);
+    return this.messageService.createMessage(table_name, params);
   }
 
   @Get('/')
   @UseGuards(AuthGuard)
-  async getAllMessage(@Req() req: Request) {
+  async getAllMessage(@Req() req: Request): Promise<IResponse<MessageDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
-    return await this.messageService.getAllMessage(table_name);
+    return this.messageService.getAllMessage(table_name);
   }
 
   @Get('/:message_id')
   @UseGuards(AuthGuard)
-  async getMessageById(@Param() params: IMessageParams, @Req() req: Request) {
+  async getMessageById(@Param() params: IMessageParams, @Req() req: Request): Promise<IResponse<MessageDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
     const { message_id = '' } = params;
-    const result = await this.messageService.getMessageById(
+    return this.messageService.getMessageById(
       table_name,
       message_id,
     );
-    return result
-      ? { success: true, message: 'Fetched record', data: result }
-      : {
-          success: false,
-          message: 'Message does not exist',
-        };
   }
 
   @Put('/:message_id')
@@ -81,25 +73,26 @@ export class MessageController {
     @Body() body: IUpdateMessageBody,
     @Param() params: IMessageParams,
     @Req() req: Request,
-  ) {
+  ): Promise<IResponse<MessageDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
     const { message } = body;
     const updated_params = { message, updated_date: new Date().getTime() };
     const { message_id = '' } = params;
-    const { status } = await this.messageService.getMessageById(
+    const { data=[] } = await this.messageService.getMessageById(
       table_name,
       message_id,
     );
+    const [{status}]= data
     if (status === EMessageStatuses.DRAFT) {
-      return await this.messageService.updateMessageById(
+      return this.messageService.updateMessageById(
         table_name,
         message_id,
         updated_params,
       );
     } else {
-      return { success: false, message: 'Only Draft messages can be edited.' };
+      return { success: false, message: 'Only Draft messages can be edited.', data:[] };
     }
   }
 }

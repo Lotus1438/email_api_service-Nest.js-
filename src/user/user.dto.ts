@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEmail } from 'class-validator';
 
 export enum EUserStatuses {
   ACTIVE = 'active',
@@ -43,7 +43,7 @@ export class UserDto {
   @IsOptional()
   birthdate?: string;
 
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
   email: string;
 

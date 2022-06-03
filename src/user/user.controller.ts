@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
   Body,
-  Logger,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -16,23 +15,22 @@ import { AuthGuard } from '../restriction/auth/auth.guard';
 import { RoleGuard } from '../restriction/role/role.guard';
 import { UtilityService } from '../utils/utility.service';
 import { UserDto, IUserParams } from './user.dto';
+import { IResponse } from '../main.type';
 
 @Controller('user')
 export class UserController {
-  private logger: Logger;
   private user_details:UserDto;
   constructor(
     private userService: UserService,
     private utilityService: UtilityService,
     ) {
     this.user_details=new UserDto();
-    this.logger = new Logger('USER');
   }
 
   @Post('/create')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async createUser(@Body() body: UserDto, @Req() req: Request) {
+  async createUser(@Body() body: UserDto, @Req() req: Request): Promise<IResponse<UserDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -42,7 +40,7 @@ export class UserController {
   @Get('/')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getAllUser(@Req() req: Request) {
+  async getAllUser(@Req() req: Request): Promise<IResponse<UserDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -52,17 +50,18 @@ export class UserController {
   @Get('/:user_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getUserById(@Param() params: IUserParams, @Req() req: Request) {
+  async getUserById(@Param() params: IUserParams, @Req() req: Request): Promise<IResponse<UserDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
     const { user_id = '' } = params;
     const result = await this.userService.getUserById(table_name, user_id);
+    const {data}=result
     return result
-      ? { success: true, message: 'Fetched record', data: result }
+      ? { success: true, message: 'Fetched record', data }
       : {
           success: false,
-          message: 'User does not exist',
+          message: 'User does not exist'
         };
   }
 
@@ -73,7 +72,7 @@ export class UserController {
     @Body() body: Record<string, any>,
     @Param() { user_id }: IUserParams,
     @Req() req: Request,
-  ) {
+  ): Promise<IResponse<UserDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -89,7 +88,7 @@ export class UserController {
   @Delete('/:user_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async deleteUserById(@Param() params: IUserParams, @Req() req: Request) {
+  async deleteUserById(@Param() params: IUserParams, @Req() req: Request): Promise<IResponse<UserDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );

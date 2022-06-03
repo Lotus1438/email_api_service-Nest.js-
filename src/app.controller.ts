@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Req, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseService } from './database.provider';
+import { IResponse } from './main.type';
 import { UserDto } from './user/user.dto';
 
 const {
@@ -11,13 +12,10 @@ const tables = TABLE_NAMES.split(',');
 
 @Controller('/register')
 export class AppController {
-  private logger: any;
   constructor(
     private appService: AppService,
     private databaseService: DatabaseService,
-  ) {
-    this.logger = new Logger('APP');
-  }
+  ) {}
 
   async onModuleInit() {
     const initialized_role = {
@@ -41,16 +39,24 @@ export class AppController {
     );
   }
   @Post('/user')
-  registerUser(@Body() body: UserDto, @Req() req: any) {
+  async registerUser(@Body() body: UserDto): Promise<IResponse<UserDto>> {
+    const { email } = body;
+    const existing_emails = await this.appService.checkEmailIfExist(
+      'user',
+      email,
+    );
+    if (existing_emails.length) {
+      return { success: false, message: 'Email already exist!' };
+    }
     return this.appService.registerRecord('user', body);
   }
   @Get('/users')
-  getAllRegisterUser(@Req() req: any) {
+  async getAllRegisterUser(): Promise<IResponse<UserDto>> {
     return this.appService.getAllRegisterRecord('user');
   }
 
   @Post('/user_role')
-  registerUserRole(@Body() body: any, @Req() req: any) {
+  async registerUserRole(@Body() body: any): Promise<IResponse<UserDto>> {
     return this.appService.registerRecord('user_role', body);
   }
 }

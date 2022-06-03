@@ -17,13 +17,19 @@ export class RoleGuard implements CanActivate {
     if (!access_token) throw new ForbiddenException();
     return this.handleRequest({ method, access_token });
   }
-  async handleRequest({ method, access_token }: IRoleRequestParams) {
+  async handleRequest({
+    method,
+    access_token,
+  }: IRoleRequestParams): Promise<boolean> {
     const user = await this.roleService.getLoggedinUser(access_token);
     if (!user) return false;
-    const { priviledges = {} } = await this.roleService.getLoggedinUserRole(
+    const { success, data = [] } = await this.roleService.getLoggedinUserRole(
       user.role_id,
     );
-    return await this.roleService.getLoggedinUserPriviledges({
+    if (!success) return false;
+
+    const [{ priviledges = {} }] = data;
+    return this.roleService.getLoggedinUserPriviledges({
       method,
       priviledges,
     });

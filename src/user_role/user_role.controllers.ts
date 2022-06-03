@@ -17,6 +17,7 @@ import { UtilityService } from '../utils/utility.service';
 import { AuthGuard } from '../restriction/auth/auth.guard';
 import { RoleGuard } from '../restriction/role/role.guard';
 import { UserRoleDto, IUserRoleParams } from './user_role.dto';
+import { IResponse } from '../main.type';
 
 @Controller('user_role')
 export class UserRoleController {
@@ -33,7 +34,7 @@ export class UserRoleController {
   @Post('/create')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async createUserRole(@Body() body: UserRoleDto, @Req() req: Request) {
+  async createUserRole(@Body() body: UserRoleDto, @Req() req: Request):Promise<IResponse<UserRoleDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -43,7 +44,7 @@ export class UserRoleController {
   @Get('/')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getAllUserRole(@Req() req: Request) {
+  async getAllUserRole(@Req() req: Request):Promise<IResponse<UserRoleDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -54,7 +55,7 @@ export class UserRoleController {
   @Get('/:user_role_id')
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard)
-  async getUserRoleById(@Param() params: IUserRoleParams, @Req() req: Request) {
+  async getUserRoleById(@Param() params: IUserRoleParams, @Req() req: Request):Promise<IResponse<UserRoleDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -63,11 +64,13 @@ export class UserRoleController {
       table_name,
       user_role_id,
     );
+    const {data}=result
     return result
-      ? { success: true, message: 'Fetched record', data: result }
+      ? { success: true, message: 'Fetched record', data }
       : {
           success: false,
           message: 'User role does not exist',
+          data:[]
         };
   }
 
@@ -78,7 +81,7 @@ export class UserRoleController {
     @Body() body: Record<string, any>,
     @Param() params: IUserRoleParams,
     @Req() req: Request,
-  ) {
+  ):Promise<IResponse<UserRoleDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );
@@ -97,7 +100,7 @@ export class UserRoleController {
   async deleteUserRoleById(
     @Param() params: IUserRoleParams,
     @Req() req: Request,
-  ) {
+  ):Promise<IResponse<UserRoleDto>> {
     const table_name = this.utilityService.getTableNameFromRoute(
       req.route.path,
     );

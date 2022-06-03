@@ -74,6 +74,11 @@ Nest is [MIT licensed](LICENSE).
 
 ## Changelogs
 
+## 0.0.11
+
+-Added -  response types, email validation, interface for query response
+-Updated - removed reply message indicator,
+
 ## 0.0.10
 
 -Added - reply function, main.type.ts, login.dto.ts
